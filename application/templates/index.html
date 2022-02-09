@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+    </head>
+    <body>
+        <div id="data-log" class="data-log"></div>
+    </body>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script type="text/javascript">
+        var graphs = {{graph_JSON | safe}};
+        Plotly.plot('data-log', graphs, {});
+    </script>
+</html>
