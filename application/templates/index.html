@@ -1,14 +1,39 @@
 <!DOCTYPE html>
 <html>
     <head>
-
+        <title>Fruiting Room Environment Monitor</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" type="text/css" media="screen and (max-width: 767px)" href="{{ url_for('static', filename='css/index_mobile.css') }}">
+        <link rel="stylesheet" type="text/css" media="screen and (min-width: 768px) and (max-width: 1199px)" href="{{ url_for('static', filename='css/index_tablet.css') }}">
+        <link rel="stylesheet" type="text/css" media="screen and (min-width: 1200px)" href="{{ url_for('static', filename='css/index_desktop.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap/bootstrap.css') }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="48x48" href="assets/faivcon_48x48.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="assets/faivcon_32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="assets/faivcon_16x16.png">
     </head>
     <body>
-        <div id="data-log" class="data-log"></div>
+        <div class="realtime-feed">
+            <div class="feed-title">
+                <div>Real-Time Data Feed</div>
+            </div>
+            <div class="feed-content">
+                <div id="realtime-time">Time Collected: {{ rt_time }}</div>
+                <div id="realtime-temperature">Temperature: {{ rt_temperature }} °F</div>
+                <div id="realtime-humidity">Relative Humidity: {{ rt_humidity }} %</div>
+                <div id="realtime-co2">CO2 Level: {{ rt_co2_level }} PPM</div>
+            </div>
+        </div>
+        <div class="chart-section">
+            <div id="data-log" class="data-log"></div>
+        </div>
     </body>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap/bootstrap.js') }}"></script>
+    <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script type="text/javascript">
-        var graphs = {{graph_JSON | safe}};
+        let graphs = {{ graph_JSON | safe }};
         Plotly.plot('data-log', graphs, {});
     </script>
 </html>

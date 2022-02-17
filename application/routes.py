@@ -8,9 +8,7 @@ import plotly.graph_objects as go
 import csv
 
 from __init__ import app, db
-from models import Data_Log
-
-from application.models import Realtime_Data
+from models import DataLog
 
 @app.route('/', methods=['GET'])
 def index():
@@ -53,14 +51,20 @@ def index():
     fig.show()
     graph_JSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    realtime = get_realtime()
+    rt_time, rt_temperature, rt_humidity, rt_co2_level = get_realtime()
 
-    return render_template('index.html', graph_JSON=graph_JSON, realtime=realtime)
+    return render_template('index.html',
+        graph_JSON=graph_JSON,
+        rt_time=rt_time,
+        rt_temperature=rt_temperature,
+        rt_humidity=rt_humidity,
+        rt_co2_level=rt_co2_level
+        )
 
 @app.route('/data-log', methods=['GET'])
 def data_log():
     data_array = []
-    for sample in Data_Log.query.all():
+    for sample in DataLog.query.all():
         sample_obj = {}
         sample_obj['sample_number'] = sample.id
         sample_obj['current_time'] = sample.time
@@ -71,8 +75,8 @@ def data_log():
     return jsonify({'fruiting room data': data_array})
 
 def get_realtime():
-    rt_time = Realtime_Data.query.first().time
-    rt_temperature = Realtime_Data.query.first().temperature
-    rt_humidity = Realtime_Data.query.first().humidity
-    rt_co2_level = Realtime_Data.query.first().carbon_dioxide
-    return (rt_time, rt_temperature, rt_humidity, rt_co2_level)
+    rt_time = DataLog.query.order_by(DataLog.id.desc()).first().time[0:19]
+    rt_temperature = DataLog.query.order_by(DataLog.id.desc()).first().temperature
+    rt_humidity = DataLog.query.order_by(DataLog.id.desc()).first().humidity
+    rt_co2_level = DataLog.query.order_by(DataLog.id.desc()).first().carbon_dioxide
+    return rt_time, rt_temperature, rt_humidity, rt_co2_level
