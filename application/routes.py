@@ -13,19 +13,33 @@ from models import DataLog
 @app.route('/', methods=['GET'])
 def index():
     # Temporary - Used for testing display of plots on frontend
-    sample_nums = []
+    # sample_nums = []
+    # time_axis = []
+    # temp_axis = []
+    # humidity_axis = []
+    # co2_axis = []
+    # with open('../data/test_set.csv', newline='') as csvfile:
+    #     csvreader = csv.reader(csvfile)
+    #     for each in csvreader:
+    #         sample_nums.append(each[0])
+    #         time_axis.append(pd.to_datetime(each[1]))
+    #         temp_axis.append(float(each[2]))
+    #         humidity_axis.append(float(each[3]))
+    #         co2_axis.append(float(each[4]))
+
+    sample_data = data_log()
+    sample_ids = []
     time_axis = []
-    temp_axis = []
+    temperature_axis = []
     humidity_axis = []
     co2_axis = []
-    with open('../data/test_set.csv', newline='') as csvfile:
-        csvreader = csv.reader(csvfile)
-        for each in csvreader:
-            sample_nums.append(each[0])
-            time_axis.append(pd.to_datetime(each[1]))
-            temp_axis.append(float(each[2]))
-            humidity_axis.append(float(each[3]))
-            co2_axis.append(float(each[4]))
+    for sample_object in sample_data:
+        sample_ids.append(sample_object['sample_number'])
+        time_axis.append(pd.to_datetime(sample_object['current_time']))
+        temperature_axis.append(sample_object['temperature'])
+        humidity_axis.append(sample_object['humidity'])
+        co2_axis.append(sample_object['co2_content'])
+
 
     fig = make_subplots(
         rows=3, cols=1,
@@ -34,7 +48,7 @@ def index():
         subplot_titles=('Temperature', 'Humidity', 'CO2 Content')
         )
 
-    fig.add_trace(go.Scatter(x=time_axis, y=temp_axis),
+    fig.add_trace(go.Scatter(x=time_axis, y=temperature_axis),
         row=1, col=1)
         
     fig.add_trace(go.Scatter(x=time_axis, y=humidity_axis),
@@ -72,7 +86,7 @@ def data_log():
         sample_obj['humidity'] = sample.humidity
         sample_obj['co2_content'] = sample.carbon_dioxide
         data_array.append(sample_obj)
-    return jsonify({'fruiting room data': data_array})
+    return data_array
 
 def get_realtime():
     rt_time = DataLog.query.order_by(DataLog.id.desc()).first().time[0:19]

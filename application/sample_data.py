@@ -4,8 +4,8 @@ import board
 import adafruit_dht
 import mh_z19
 
-from ..application.__init__ import db
-from ..application.models import DataLog, DataLogHistorical
+from __init__ import db
+from models import DataLog, DataLogHistorical
 
 # Initialize runtime parameters
 dht_device = adafruit_dht.DHT22(board.D4)
@@ -22,17 +22,20 @@ def trim_samples(sample_id):
 while True:
     try:
         # Retrieve current latest sample number from database
-        sample_num = DataLog.query.order_by(DataLog.id.desc()).first().id
+        try:
+            sample_num = DataLog.query.order_by(DataLog.id.desc()).first().id
+        except AttributeError as error:
+            sample_num = 0
         sample_num += 1
 
         # Collect data points from DHT22 and MH-Z19B sensors
         current_time = datetime.datetime.now()
         temperature = dht_device.temperature * (9 / 5) + 32
         humidity = dht_device.humidity
-        carbon_dioxide = mh_z19.read()
+        carbon_dioxide = mh_z19.read()['co2']
         print(f'Sample Number: {sample_num} | Time of Sample: {current_time} | Temperature: {temperature} | Humidity: {humidity} | Carbon Dioxide: {carbon_dioxide}')
 
-        sample = DataLog(sample_num, current_time, temperature, humidity, carbon_dioxide)
+        sample = DataLog(id=sample_num, time=current_time, temperature=temperature, humidity=humidity, carbon_dioxide=carbon_dioxide)
         db.session.add(sample)
         db.session.commit()
 
