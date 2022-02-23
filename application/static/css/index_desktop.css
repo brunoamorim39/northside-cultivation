@@ -1,0 +1,5 @@
+.feed-content {
+    flex-direction: row !important;
+    justify-content: space-around !important;
+    width: 75% !important;
+}

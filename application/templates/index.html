@@ -3,7 +3,7 @@
     <head>
         <title>Fruiting Room Environment Monitor</title>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
         <link rel="stylesheet" type="text/css" media="screen and (max-width: 767px)" href="{{ url_for('static', filename='css/index_mobile.css') }}">
         <link rel="stylesheet" type="text/css" media="screen and (min-width: 768px) and (max-width: 1199px)" href="{{ url_for('static', filename='css/index_tablet.css') }}">
         <link rel="stylesheet" type="text/css" media="screen and (min-width: 1200px)" href="{{ url_for('static', filename='css/index_desktop.css') }}">
@@ -15,17 +15,29 @@
     </head>
     <body>
         <div class="realtime-feed">
-            <div class="feed-title">
-                <div>Real-Time Data Feed</div>
+            <div class="feed-title text-center fs-1">
+                <div>Realtime Data Feed</div>
             </div>
-            <div class="feed-content">
-                <div id="realtime-time">Time Collected: {{ rt_time }}</div>
-                <div id="realtime-temperature">Temperature: {{ rt_temperature }} °F</div>
-                <div id="realtime-humidity">Relative Humidity: {{ rt_humidity }} %</div>
-                <div id="realtime-co2">CO2 Level: {{ rt_co2_level }} PPM</div>
+            <div class="feed-content d-flex flex-wrap align-content-center mx-auto">
+                <div class="time-block text-center fs-5 mt-3">
+                    <div id="realtime-time-label">Time Collected</div>
+                    <div id="realtime-time">{{ rt_time }}</div>
+                </div>
+                <div class="temperature-block text-center fs-5 mt-3">
+                    <div id="realtime-temperature">Temperature</div>
+                    <div id="realtime-temperature">{{ rt_temperature }}°F</div>
+                </div>
+                <div class="humidity-block text-center fs-5 mt-3">
+                    <div id="realtime-humidity">Relative Humidity</div>
+                    <div id="realtime-humidity">{{ rt_humidity }}%</div>
+                </div>
+                <div class="co2-block text-center fs-5 mt-3">
+                    <div id="realtime-co2">CO2 Level</div>
+                    <div id="realtime-co2">{{ rt_co2_level }} PPM</div>
+                </div>
             </div>
         </div>
-        <div class="chart-section">
+        <div class="chart-section w-100">
             <div id="data-log" class="data-log"></div>
         </div>
     </body>

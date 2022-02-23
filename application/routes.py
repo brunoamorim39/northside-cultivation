@@ -12,27 +12,14 @@ from models import DataLog
 
 @app.route('/', methods=['GET'])
 def index():
-    # Temporary - Used for testing display of plots on frontend
-    # sample_nums = []
-    # time_axis = []
-    # temp_axis = []
-    # humidity_axis = []
-    # co2_axis = []
-    # with open('../data/test_set.csv', newline='') as csvfile:
-    #     csvreader = csv.reader(csvfile)
-    #     for each in csvreader:
-    #         sample_nums.append(each[0])
-    #         time_axis.append(pd.to_datetime(each[1]))
-    #         temp_axis.append(float(each[2]))
-    #         humidity_axis.append(float(each[3]))
-    #         co2_axis.append(float(each[4]))
-
+    # Pulls sample data from database and prepares it for display via Plotly
     sample_data = data_log()
     sample_ids = []
     time_axis = []
     temperature_axis = []
     humidity_axis = []
     co2_axis = []
+
     for sample_object in sample_data:
         sample_ids.append(sample_object['sample_number'])
         time_axis.append(pd.to_datetime(sample_object['current_time']))
@@ -40,7 +27,7 @@ def index():
         humidity_axis.append(sample_object['humidity'])
         co2_axis.append(sample_object['co2_content'])
 
-
+    # Plotly configuration for interactive subplots
     fig = make_subplots(
         rows=3, cols=1,
         shared_xaxes=True,
@@ -48,23 +35,30 @@ def index():
         subplot_titles=('Temperature', 'Humidity', 'CO2 Content')
         )
 
-    fig.add_trace(go.Scatter(x=time_axis, y=temperature_axis),
+    fig.add_trace(go.Scatter(x=time_axis, y=temperature_axis, name='Temperature'),
         row=1, col=1)
         
-    fig.add_trace(go.Scatter(x=time_axis, y=humidity_axis),
+    fig.add_trace(go.Scatter(x=time_axis, y=humidity_axis, name='Humidity'),
         row=2, col=1)
         
-    fig.add_trace(go.Scatter(x=time_axis, y=co2_axis),
+    fig.add_trace(go.Scatter(x=time_axis, y=co2_axis, name='CO2 Content'),
         row=3, col=1)
         
     fig.update_layout(
-        height=800, width=1200,
+        height=1200,
         showlegend=False,
         title_text='Fruiting Room Environment Data'
         )
-    fig.show()
+
+    config = ({
+        'scrollZoom': True,
+        'displaylogo': False
+        })
+
+    fig.show(config=config)
     graph_JSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
+    # Captures realtime data of the environment to display
     rt_time, rt_temperature, rt_humidity, rt_co2_level = get_realtime()
 
     return render_template('index.html',
