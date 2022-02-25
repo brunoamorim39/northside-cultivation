@@ -1,3 +1,11 @@
 .feed-content {
     flex-direction: column !important;
 }
+
+.logo {
+    width: 100%;
+}
+
+.logo-image {
+    height: 15vh;
+}

@@ -3,3 +3,11 @@
     justify-content: space-around !important;
     width: 75% !important;
 }
+
+.logo {
+    width: 100%;
+}
+
+.logo-image {
+    height: 10vh;
+}
