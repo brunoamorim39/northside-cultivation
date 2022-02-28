@@ -74,16 +74,16 @@ def condition_analysis():
         print(f'CARBON DIOXIDE READING OF {current_carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_MAX}%')
     elif current_carbon_dioxide >= TARGET_CO2_CONTENT * (1 + CO2_TOLERANCE_BAND) and current_carbon_dioxide < MAX_CO2_CONTENT:
         set_fan_speed(humidifer_fan, FAN_HIGH)
-        print(f'CARBON DIOXIDE READING OF {current_carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_MAX}%')
+        print(f'CARBON DIOXIDE READING OF {current_carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_HIGH}%')
     elif current_carbon_dioxide <= TARGET_CO2_CONTENT * (1 - CO2_TOLERANCE_BAND) and current_carbon_dioxide > MIN_CO2_CONTENT:
         set_fan_speed(humidifer_fan, FAN_MID)
-        print(f'CARBON DIOXIDE READING OF {current_carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_MAX}%')
+        print(f'CARBON DIOXIDE READING OF {current_carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_MID}%')
     elif current_carbon_dioxide <= MIN_CO2_CONTENT:
         set_fan_speed(humidifer_fan, FAN_LOW)
-        print(f'CARBON DIOXIDE READING OF {current_carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_MAX}%')
+        print(f'CARBON DIOXIDE READING OF {current_carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_LOW}%')
     else:
         set_fan_speed(humidifer_fan, FAN_MID)
-        print(f'CARBON DIOXIDE READING OF {current_carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_MAX}%')
+        print(f'CARBON DIOXIDE READING OF {current_carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_MID}%')
 
 try:
     print('Initializing control...')
@@ -106,6 +106,12 @@ try:
         time.sleep(STALL_TIME)
 
 except KeyboardInterrupt:
+    print(f'''
+        CANCELLED CONTROL:\n
+        SETTING HUMIDIFIER FAN SPEED TO {FAN_HIGH}\n
+        SETTING INTAKE FAN SPEED TO {FAN_HIGH}\n
+        SETTING EXHAUST FAN SPEED TO {FAN_HIGH}
+    ''')
     set_fan_speed(humidifer_fan, FAN_HIGH)
     # set_fan_speed(intake_fan, FAN_HIGH)
     # set_fan_speed(exhaust_fan, FAN_HIGH)
