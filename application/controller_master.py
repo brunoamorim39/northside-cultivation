@@ -71,16 +71,22 @@ def condition_analysis():
 
     if current_carbon_dioxide >= MAX_CO2_CONTENT:
         set_fan_speed(humidifer_fan, FAN_MAX)
+        print(f'CARBON DIOXIDE READING OF {current_carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_MAX}%')
     elif current_carbon_dioxide >= TARGET_CO2_CONTENT * (1 + CO2_TOLERANCE_BAND) and current_carbon_dioxide < MAX_CO2_CONTENT:
         set_fan_speed(humidifer_fan, FAN_HIGH)
+        print(f'CARBON DIOXIDE READING OF {current_carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_MAX}%')
     elif current_carbon_dioxide <= TARGET_CO2_CONTENT * (1 - CO2_TOLERANCE_BAND) and current_carbon_dioxide > MIN_CO2_CONTENT:
         set_fan_speed(humidifer_fan, FAN_MID)
+        print(f'CARBON DIOXIDE READING OF {current_carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_MAX}%')
     elif current_carbon_dioxide <= MIN_CO2_CONTENT:
         set_fan_speed(humidifer_fan, FAN_LOW)
+        print(f'CARBON DIOXIDE READING OF {current_carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_MAX}%')
     else:
         set_fan_speed(humidifer_fan, FAN_MID)
+        print(f'CARBON DIOXIDE READING OF {current_carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_MAX}%')
 
 try:
+    print('Initializing control...')
     # Initialize PWM fan control
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)

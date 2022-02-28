@@ -1,0 +1,8 @@
+START SERVER
+sudo uwsgi --ini uwsgi.ini
+
+SAMPLE DATA
+sudo python3 sample_data.py
+
+RUN CONTROLLERS
+python3 controller_master.py
