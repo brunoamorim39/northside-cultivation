@@ -121,9 +121,18 @@ try:
         fan_control()
 
         initial_time = time.time()
-        GPIO.add_event_detect(HUMIDIFIER_FAN_RPM_PIN, GPIO.FALLING, read_fan_speed('Humidifier', HUMIDIFER_FAN_RPM_PULSE))
-        GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.FALLING, read_fan_speed('Intake', INTAKE_FAN_RPM_PULSE))
-        GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.FALLING, read_fan_speed('Exhaust', EXHAUST_FAN_RPM_PULSE))
+        GPIO.add_event_detect(HUMIDIFIER_FAN_RPM_PIN, GPIO.FALLING)
+        GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.FALLING)
+        GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.FALLING)
+
+        if GPIO.event_detected(HUMIDIFIER_FAN_RPM_PIN):
+            read_fan_speed('Humidifier', HUMIDIFER_FAN_RPM_PULSE)
+        
+        if GPIO.event_detected(INTAKE_FAN_RPM_PIN):
+            read_fan_speed('Intake', INTAKE_FAN_RPM_PULSE)
+
+        if GPIO.event_detected(EXHAUST_FAN_RPM_PIN):
+            read_fan_speed('Exhaust', EXHAUST_FAN_RPM_PULSE)
 
         time.sleep(STALL_TIME)
 
