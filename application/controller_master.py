@@ -129,10 +129,10 @@ try:
 
 except KeyboardInterrupt:
     print(f'''
-        CANCELLED CONTROL:\n
-        SETTING HUMIDIFIER FAN SPEED TO {FAN_HIGH}\n
-        SETTING INTAKE FAN SPEED TO {FAN_HIGH}\n
-        SETTING EXHAUST FAN SPEED TO {FAN_HIGH}
+        CANCELLED CONTROL:
+        SETTING HUMIDIFIER FAN SPEED TO {FAN_HIGH}%
+        SETTING INTAKE FAN SPEED TO {FAN_HIGH}%
+        SETTING EXHAUST FAN SPEED TO {FAN_HIGH}%
     ''')
     set_fan_speed(humidifer_fan, FAN_HIGH)
     # set_fan_speed(intake_fan, FAN_HIGH)
