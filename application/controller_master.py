@@ -127,7 +127,7 @@ try:
 
     # Realtime control
     while True:
-        db.session.refresh(DataLog)
+        db.session.expire_all()
         fan_control()
 
         initial_time = time.time()
