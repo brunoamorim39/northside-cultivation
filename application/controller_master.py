@@ -1,8 +1,6 @@
 import RPi.GPIO as GPIO
 import time
-import signal
-import sys
-import os
+from importlib import reload
 
 from __init__ import db
 from models import DataLog
@@ -58,9 +56,9 @@ def set_fan_speed(target_fan, fan_speed):
     return
 
 def fan_control():
-    from __init__ import db
-    from models import DataLog
-
+    db = reload(db)
+    DataLog = reload(DataLog)
+    
     # Temperature Control
     current_temperature = DataLog.query.order_by(DataLog.id.desc()).first().temperature
 
