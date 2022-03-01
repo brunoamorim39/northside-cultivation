@@ -55,10 +55,7 @@ def set_fan_speed(target_fan, fan_speed):
     target_fan.start(fan_speed)
     return
 
-def fan_control():
-    db = reload(db)
-    DataLog = reload(DataLog)
-    
+def fan_control():    
     # Temperature Control
     current_temperature = DataLog.query.order_by(DataLog.id.desc()).first().temperature
 
@@ -128,6 +125,9 @@ try:
 
     # Realtime control
     while True:
+        db = reload(db)
+        DataLog = reload(DataLog)
+        
         fan_control()
 
         initial_time = time.time()
