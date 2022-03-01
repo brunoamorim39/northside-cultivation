@@ -125,9 +125,9 @@ try:
 
     # Realtime control
     while True:
-        db = reload(db)
-        DataLog = reload(DataLog)
-        
+        reload(__init__)
+        reload(models)
+
         fan_control()
 
         initial_time = time.time()
