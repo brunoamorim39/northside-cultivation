@@ -43,10 +43,10 @@ TARGET_HUMIDITY = 95            # [% Relative Humidity]
 MAX_HUMIDITY = 100
 HUMIDITY_TOLERANCE_BAND = 0.03
 
-MIN_CO2_CONTENT = 400
+MIN_CO2_CONTENT = 500
 TARGET_CO2_CONTENT = 600        # [Parts per Million CO2]
-MAX_CO2_CONTENT = 800
-CO2_TOLERANCE_BAND = 0.15
+MAX_CO2_CONTENT = 700
+CO2_TOLERANCE_BAND = 0.10
 
 FAN_OFF = 0
 FAN_LOW = 25
@@ -70,27 +70,60 @@ def set_fan_speed(target_fan, fan_speed):
 
 def fan_control(temperature, humidity, carbon_dioxide):    
     # Temperature Control
-
+    if temperature >= MAX_TEMPERATURE:
+        set_fan_speed(intake_fan, FAN_MAX)
+        print(f'TEMPERATURE READING OF {temperature}°F - SETTING INTAKE FAN TO {FAN_MAX}%')
+    elif temperature >= TARGET_TEMPERATURE * (1 + TEMPERATURE_TOLERANCE_BAND) and temperature < MAX_TEMPERATURE:
+        set_fan_speed(intake_fan, FAN_HIGH)
+        print(f'TEMPERATURE READING OF {temperature}°F - SETTING INTAKE FAN TO {FAN_HIGH}%')
+    elif temperature <= TARGET_TEMPERATURE * (1 - TEMPERATURE_TOLERANCE_BAND) and temperature > MIN_TEMPERATURE:
+        set_fan_speed(intake_fan, FAN_MID)
+        print(f'TEMPERATURE READING OF {temperature}°F - SETTING INTAKE FAN TO {FAN_MID}%')
+    elif temperature <= MIN_TEMPERATURE:
+        set_fan_speed(intake_fan, FAN_LOW)
+        print(f'TEMPERATURE READING OF {temperature}°F - SETTING INTAKE FAN TO {FAN_LOW}%')
+    else:
+        set_fan_speed(intake_fan, FAN_MID)
+        print(f'TEMPERATURE READING OF {temperature}°F - SETTING INTAKE FAN TO {FAN_MID}%')
 
     # Humidity Control
-
+    if humidity <= MIN_HUMIDITY:
+        set_fan_speed(humidifer_fan, FAN_MAX)
+        # Power on humidifier disc
+        print(f'HUMIDITY READING OF {humidity}% - POWERING ON HUMIDIFIER AND SETTING FAN TO {FAN_MAX}%')
+    elif humidity <= TARGET_HUMIDITY * (1 - HUMIDITY_TOLERANCE_BAND) and humidity > MIN_HUMIDITY:
+        set_fan_speed(humidifer_fan, FAN_HIGH)
+        # Power on humidifier disc
+        print(f'HUMIDITY READING OF {humidity}% - POWERING ON HUMIDIFIER AND SETTING FAN TO {FAN_HIGH}%')
+    elif humidity <= TARGET_HUMIDITY * (1 + HUMIDITY_TOLERANCE_BAND) and humidity > TARGET_HUMIDITY * (1 - HUMIDITY_TOLERANCE_BAND):
+        set_fan_speed(humidifer_fan, FAN_MID)
+        # Power on humidifier disc
+        print(f'HUMIDITY READING OF {humidity}% - POWERING ON HUMIDIFIER AND SETTING FAN TO {FAN_MID}%')
+    elif humidity <= MAX_HUMIDITY and humidity > TARGET_HUMIDITY * (1 + HUMIDITY_TOLERANCE_BAND):
+        set_fan_speed(humidifer_fan, FAN_LOW)
+        # Power off humidifier disc
+        print(f'HUMIDITY READING OF {humidity}% - POWERING OFF HUMIDIFIER AND SETTING FAN TO {FAN_LOW}%')
+    else:
+        set_fan_speed(humidifer_fan, FAN_LOW)
+        # Power off humidifier disc
+        print(f'HUMIDITY READING OF {humidity}% - POWERING OFF HUMIDIFIER AND SETTING FAN TO {FAN_OFF}%')
 
     # Carbon Dioxide Content Control
     if carbon_dioxide >= MAX_CO2_CONTENT:
-        set_fan_speed(humidifer_fan, FAN_MAX)
-        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_MAX}%')
+        set_fan_speed(exhaust_fan, FAN_MAX)
+        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_MAX}%')
     elif carbon_dioxide >= TARGET_CO2_CONTENT * (1 + CO2_TOLERANCE_BAND) and carbon_dioxide < MAX_CO2_CONTENT:
-        set_fan_speed(humidifer_fan, FAN_HIGH)
-        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_HIGH}%')
+        set_fan_speed(exhaust_fan, FAN_HIGH)
+        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_HIGH}%')
     elif carbon_dioxide <= TARGET_CO2_CONTENT * (1 - CO2_TOLERANCE_BAND) and carbon_dioxide > MIN_CO2_CONTENT:
-        set_fan_speed(humidifer_fan, FAN_MID)
-        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_MID}%')
+        set_fan_speed(exhaust_fan, FAN_MID)
+        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_MID}%')
     elif carbon_dioxide <= MIN_CO2_CONTENT:
-        set_fan_speed(humidifer_fan, FAN_LOW)
-        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_LOW}%')
+        set_fan_speed(exhaust_fan, FAN_LOW)
+        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_LOW}%')
     else:
-        set_fan_speed(humidifer_fan, FAN_MID)
-        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} - SETTING HUMIDIFER FAN SPEED TO {FAN_MID}%')
+        set_fan_speed(exhaust_fan, FAN_MID)
+        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_MID}%')
 
 def read_fan_speed(fan, pulse):
     dt = time.time() - initial_time
@@ -109,26 +142,26 @@ try:
     GPIO.setmode(GPIO.BCM)
 
     GPIO.setup(HUMIDIFIER_FAN_PWM_PIN, GPIO.OUT, initial=GPIO.LOW)
-    # GPIO.setup(INTAKE_FAN_PWM_PIN, GPIO.OUT, initial=GPIO.LOW)
-    # GPIO.setup(EXHAUST_FAN_PWM_PIN, GPIO.OUT, initial=GPIO.LOW)
+    GPIO.setup(INTAKE_FAN_PWM_PIN, GPIO.OUT, initial=GPIO.LOW)
+    GPIO.setup(EXHAUST_FAN_PWM_PIN, GPIO.OUT, initial=GPIO.LOW)
 
     GPIO.setup(HUMIDIFIER_FAN_RPM_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    # GPIO.setup(INTAKE_FAN_RPM_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    # GPIO.setup(EXHAUST_FAN_RPM_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(INTAKE_FAN_RPM_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(EXHAUST_FAN_RPM_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     humidifer_fan = GPIO.PWM(HUMIDIFIER_FAN_PWM_PIN, HUMIDIFIER_FAN_PWM_FREQ)
-    # intake_fan = GPIO.PWM(INTAKE_FAN_PWM_PIN, INTAKE_FAN_PWM_FREQ)
-    # exhaust_fan = GPIO.PWM(EXHAUST_FAN_PWM_PIN, EXHAUST_FAN_PWM_FREQ)
+    intake_fan = GPIO.PWM(INTAKE_FAN_PWM_PIN, INTAKE_FAN_PWM_FREQ)
+    exhaust_fan = GPIO.PWM(EXHAUST_FAN_PWM_PIN, EXHAUST_FAN_PWM_FREQ)
 
     set_fan_speed(humidifer_fan, FAN_OFF)
-    # set_fan_speed(intake_fan, FAN_OFF)
-    # set_fan_speed(exhaust_fan, FAN_OFF)
+    set_fan_speed(intake_fan, FAN_OFF)
+    set_fan_speed(exhaust_fan, FAN_OFF)
 
     # Fan RPM data collection
     initial_time = time.time()
     GPIO.add_event_detect(HUMIDIFIER_FAN_RPM_PIN, GPIO.BOTH)
-    # GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.BOTH)
-    # GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.BOTH)
+    GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.BOTH)
+    GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.BOTH)
 
     # Runtime
     while True:
@@ -187,6 +220,6 @@ except KeyboardInterrupt:
         SETTING EXHAUST FAN SPEED TO {FAN_HIGH}%
     ''')
     set_fan_speed(humidifer_fan, FAN_HIGH)
-    # set_fan_speed(intake_fan, FAN_HIGH)
-    # set_fan_speed(exhaust_fan, FAN_HIGH)
+    set_fan_speed(intake_fan, FAN_HIGH)
+    set_fan_speed(exhaust_fan, FAN_HIGH)
     GPIO.cleanup()
