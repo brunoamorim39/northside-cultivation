@@ -16,20 +16,20 @@ sampling_frequency = 100.0
 HUMIDIFIER_FAN_PWM_PIN = 16     # Pin used to control PWM fan
 HUMIDIFIER_FAN_PWM_FREQ = 25    # [kHz] Frequency for PWM control
 
-INTAKE_FAN_PWM_PIN = 0          # Pin used to control PWM fan
+INTAKE_FAN_PWM_PIN = 13          # Pin used to control PWM fan
 INTAKE_FAN_PWM_FREQ = 25        # [kHz] Frequency for PWM control
 
-EXHAUST_FAN_PWM_PIN = 0         # Pin used to control PWM fan
+EXHAUST_FAN_PWM_PIN = 29         # Pin used to control PWM fan
 EXHAUST_FAN_PWM_FREQ = 25       # [kHz] Frequency for PWM control
 
 # Initialization for RPM feedback
 HUMIDIFIER_FAN_RPM_PIN = 18     # Pin for RPM output
 HUMIDIFER_FAN_RPM_PULSE = 2     # Pulses per fan revolution
 
-INTAKE_FAN_RPM_PIN = 0          # Pin for RPM output
+INTAKE_FAN_RPM_PIN = 15          # Pin for RPM output
 INTAKE_FAN_RPM_PULSE = 2        # Pulses per fan revolution
 
-EXHAUST_FAN_RPM_PIN = 0         # Pin for RPM output
+EXHAUST_FAN_RPM_PIN = 31         # Pin for RPM output
 EXHAUST_FAN_RPM_PULSE = 2       # Pulses per fan revolution
 
 # Parameters for temperature, humidity, and CO2 content control
@@ -65,7 +65,7 @@ def trim_samples(sample_id):
         db.session.commit()
 
 def set_fan_speed(target_fan, fan_speed):
-    target_fan.start(fan_speed)
+    target_fan.ChangeDutyCycle(fan_speed)
     return
 
 def fan_control(temperature, humidity, carbon_dioxide):    
@@ -138,7 +138,7 @@ def read_fan_speed(fan, pulse):
 try:
     print('Initializing control...')
     # Initialize PWM fan control
-    GPIO.setwarnings(False)
+    # GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
 
     GPIO.setup(HUMIDIFIER_FAN_PWM_PIN, GPIO.OUT, initial=GPIO.LOW)
@@ -153,9 +153,13 @@ try:
     intake_fan = GPIO.PWM(INTAKE_FAN_PWM_PIN, INTAKE_FAN_PWM_FREQ)
     exhaust_fan = GPIO.PWM(EXHAUST_FAN_PWM_PIN, EXHAUST_FAN_PWM_FREQ)
 
-    set_fan_speed(humidifer_fan, FAN_OFF)
-    set_fan_speed(intake_fan, FAN_OFF)
-    set_fan_speed(exhaust_fan, FAN_OFF)
+    humidifer_fan.start(FAN_OFF)
+    intake_fan.start(FAN_OFF)
+    exhaust_fan.start(FAN_OFF)
+
+    # set_fan_speed(humidifer_fan, FAN_OFF)
+    # set_fan_speed(intake_fan, FAN_OFF)
+    # set_fan_speed(exhaust_fan, FAN_OFF)
 
     # Fan RPM data collection
     initial_time = time.time()
