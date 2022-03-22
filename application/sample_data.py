@@ -80,6 +80,10 @@ def read_fan_speed(fan, pulse):
     rpm = (frequency / pulse) * 60
     print(f'{fan} FAN SPEED = {rpm} RPM')
 
+def read_fan_speed_alt(fan, duty_cycle):
+    fan_speed_approx = FAN_MAX_SPEED * FAN_EFFICIENCY * duty_cycle
+    return fan_speed_approx
+
 def fan_control(temperature, humidity, carbon_dioxide):    
     # Temperature Control
     if temperature >= MAX_TEMPERATURE:
