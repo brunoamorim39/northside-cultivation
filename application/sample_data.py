@@ -72,13 +72,14 @@ def set_fan_speed(target_fan, fan_speed):
 def read_fan_speed(fan, pulse):
     global initial_time
 
-    dt = time.time() - initial_time
+    dt = time.time() - initial_time - 1.0
     if dt < 0.005:
         return
 
     frequency = 1 / dt
     rpm = (frequency / pulse) * 60
     print(f'{fan} FAN SPEED = {rpm} RPM')
+    initial_time = time.time()
 
 def read_fan_speed_alt(fan, duty_cycle):
     fan_speed_approx = FAN_MAX_SPEED * FAN_EFFICIENCY * duty_cycle
@@ -199,12 +200,20 @@ try:
 
             initial_time = time.time()
             GPIO.add_event_detect(HUMIDIFIER_FAN_RPM_PIN, GPIO.FALLING, callback=lambda x: read_fan_speed('Humidifier', HUMIDIFIER_FAN_RPM_PULSE))
-            GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.FALLING, callback=lambda x: read_fan_speed('Intake', INTAKE_FAN_RPM_PULSE))
-            GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.FALLING, callback=lambda x: read_fan_speed('Exhaust', EXHAUST_FAN_RPM_PULSE))
-
+            time.sleep(1.0)
             GPIO.remove_event_detect(HUMIDIFIER_FAN_RPM_PIN)
+
+            GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.FALLING, callback=lambda x: read_fan_speed('Intake', INTAKE_FAN_RPM_PULSE))
+            time.sleep(1.0)
             GPIO.remove_event_detect(INTAKE_FAN_RPM_PIN)
+
+            GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.FALLING, callback=lambda x: read_fan_speed('Exhaust', EXHAUST_FAN_RPM_PULSE))
+            time.sleep(1.0)
             GPIO.remove_event_detect(EXHAUST_FAN_RPM_PIN)
+
+            
+            
+            
 
             # Tachometer
             # if GPIO.event_detected(HUMIDIFIER_FAN_RPM_PIN):
