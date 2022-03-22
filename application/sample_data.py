@@ -201,7 +201,7 @@ try:
 
             # Collect data points from DHT22 and MH-Z19B sensors
             current_time = datetime.datetime.now()
-            temperature = dht_device.temperature * (9 / 5) + 32
+            temperature = round(dht_device.temperature * (9 / 5) + 32, 2)
             humidity = dht_device.humidity
             carbon_dioxide = mh_z19.read_from_pwm(gpio=12, range=4000)['co2']
             print(f'Sample Number: {sample_num} | Time of Sample: {current_time} | Temperature: {temperature} | Humidity: {humidity} | Carbon Dioxide: {carbon_dioxide}')
