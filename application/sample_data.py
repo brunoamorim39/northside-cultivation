@@ -180,7 +180,7 @@ try:
             temperature = round(dht_device.temperature * (9 / 5) + 32, 2)
             humidity = dht_device.humidity
             # carbon_dioxide = mh_z19.read()['co2']
-            carbon_dioxide = mh_z19.read_from_pwm(gpio=12, range=4000)['co2']
+            carbon_dioxide = mh_z19.read_from_pwm(gpio=12, range=5000)['co2']
             print(f'Sample Number: {sample_num} | Time of Sample: {current_time} | Temperature: {temperature} | Humidity: {humidity} | Carbon Dioxide: {carbon_dioxide}')
 
             sample = DataLog(id=sample_num, time=current_time, temperature=temperature, humidity=humidity, carbon_dioxide=carbon_dioxide)
