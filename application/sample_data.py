@@ -24,7 +24,7 @@ EXHAUST_FAN_PWM_FREQ = 25       # [Hz] Frequency for PWM control
 
 # Initialization for RPM feedback
 HUMIDIFIER_FAN_RPM_PIN = 24     # Pin for RPM output
-HUMIDIFER_FAN_RPM_PULSE = 2     # Pulses per fan revolution
+HUMIDIFIER_FAN_RPM_PULSE = 2     # Pulses per fan revolution
 
 INTAKE_FAN_RPM_PIN = 22         # Pin for RPM output
 INTAKE_FAN_RPM_PULSE = 2        # Pulses per fan revolution
@@ -67,6 +67,42 @@ def trim_samples(sample_id):
 def set_fan_speed(target_fan, fan_speed):
     target_fan.ChangeDutyCycle(fan_speed)
     return
+
+def read_fan_speed_humidifier(n):
+    global initial_time
+
+    dt = time.time() - initial_time
+    if dt < 0.005:
+        return
+
+    frequency = 1 / dt
+    rpm = (frequency / HUMIDIFIER_FAN_RPM_PULSE) * 60
+    print(f'HUMIDIFIER FAN SPEED = {rpm} RPM')
+    initial_time = time.time()
+
+def read_fan_speed_intake(n):
+    global initial_time
+
+    dt = time.time() - initial_time
+    if dt < 0.005:
+        return
+
+    frequency = 1 / dt
+    rpm = (frequency / INTAKE_FAN_RPM_PULSE) * 60
+    print(f'INTAKE FAN SPEED = {rpm} RPM')
+    initial_time = time.time()
+
+def read_fan_speed_exhaust(n):
+    global initial_time
+
+    dt = time.time() - initial_time
+    if dt < 0.005:
+        return
+
+    frequency = 1 / dt
+    rpm = (frequency / EXHAUST_FAN_RPM_PULSE) * 60
+    print(f'EXHAUST FAN SPEED = {rpm} RPM')
+    initial_time = time.time()
 
 def fan_control(temperature, humidity, carbon_dioxide):    
     # Temperature Control
@@ -125,20 +161,10 @@ def fan_control(temperature, humidity, carbon_dioxide):
         set_fan_speed(exhaust_fan, FAN_MID)
         print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_MID}%')
 
-def read_fan_speed(fan, pulse):
-    dt = time.time() - initial_time
-    if dt < 0.005:
-        return
-
-    frequency = 1 / dt
-    rpm = (frequency / pulse) * 60
-    print(f'{fan} fan speed = {rpm} RPM')
-    initial_time = time.time()
-
 try:
     print('Initializing control...')
     # Initialize PWM fan control
-    # GPIO.setwarnings(False)
+    GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
 
     GPIO.setup(HUMIDIFIER_FAN_PWM_PIN, GPIO.OUT, initial=GPIO.LOW)
@@ -156,10 +182,6 @@ try:
     humidifer_fan.start(FAN_OFF)
     intake_fan.start(FAN_OFF)
     exhaust_fan.start(FAN_OFF)
-
-    # set_fan_speed(humidifer_fan, FAN_OFF)
-    # set_fan_speed(intake_fan, FAN_OFF)
-    # set_fan_speed(exhaust_fan, FAN_OFF)
 
     # Fan RPM data collection
     initial_time = time.time()
@@ -181,7 +203,7 @@ try:
             current_time = datetime.datetime.now()
             temperature = dht_device.temperature * (9 / 5) + 32
             humidity = dht_device.humidity
-            carbon_dioxide = mh_z19.read_from_pwm(gpio=12, range=2000)['co2']
+            carbon_dioxide = mh_z19.read_from_pwm(gpio=12, range=4000)['co2']
             print(f'Sample Number: {sample_num} | Time of Sample: {current_time} | Temperature: {temperature} | Humidity: {humidity} | Carbon Dioxide: {carbon_dioxide}')
 
             sample = DataLog(id=sample_num, time=current_time, temperature=temperature, humidity=humidity, carbon_dioxide=carbon_dioxide)
@@ -194,16 +216,6 @@ try:
 
             # Controller
             fan_control(temperature, humidity, carbon_dioxide)
-
-            initial_time = time.time()
-            if GPIO.event_detected(HUMIDIFIER_FAN_RPM_PIN):
-                read_fan_speed('Humidifier', HUMIDIFER_FAN_RPM_PULSE)
-        
-            if GPIO.event_detected(INTAKE_FAN_RPM_PIN):
-                read_fan_speed('Intake', INTAKE_FAN_RPM_PULSE)
-
-            if GPIO.event_detected(EXHAUST_FAN_RPM_PIN):
-                read_fan_speed('Exhaust', EXHAUST_FAN_RPM_PULSE)
             
             time.sleep(sampling_frequency / 2)
 
