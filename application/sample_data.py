@@ -68,42 +68,19 @@ def set_fan_speed(target_fan, fan_speed):
     target_fan.ChangeDutyCycle(fan_speed)
     return
 
-def read_fan_speed_humidifier(n):
-    global initial_time_humidifier
+def read_fan_speed(fan, pulse):
+    global initial_time
+    rpm_sleep = 5
 
-    dt = time.time() - initial_time_humidifier
+    dt = time.time() - initial_time - sampling_frequency - rpm_sleep
     if dt < 0.005:
         return
 
     frequency = 1 / dt
-    rpm = (frequency / HUMIDIFIER_FAN_RPM_PULSE) * 60
-    print(f'HUMIDIFIER FAN SPEED = {rpm} RPM')
-    initial_time_humidifier = time.time()
-    time.sleep(5)
-
-def read_fan_speed_intake(n):
-    global initial_time_intake
-
-    dt = time.time() - initial_time_intake
-    if dt < 0.005:
-        return
-
-    frequency = 1 / dt
-    rpm = (frequency / INTAKE_FAN_RPM_PULSE) * 60
-    print(f'INTAKE FAN SPEED = {rpm} RPM')
-    initial_time_intake = time.time()
-
-def read_fan_speed_exhaust(n):
-    global initial_time_exhaust
-
-    dt = time.time() - initial_time_exhaust
-    if dt < 0.005:
-        return
-
-    frequency = 1 / dt
-    rpm = (frequency / EXHAUST_FAN_RPM_PULSE) * 60
-    print(f'EXHAUST FAN SPEED = {rpm} RPM')
-    initial_time_exhaust = time.time()
+    rpm = (frequency / pulse) * 60
+    print(f'{fan} FAN SPEED = {rpm} RPM')
+    initial_time = time.time()
+    time.sleep(rpm_sleep)
 
 def fan_control(temperature, humidity, carbon_dioxide):    
     # Temperature Control
@@ -222,13 +199,10 @@ try:
             
             time.sleep(sampling_frequency / 2)
 
-            initial_time_humidifier = time.time()
-            initial_time_intake = time.time()
-            initial_time_exhaust = time.time()    
-
-            read_fan_speed_humidifier()
-            read_fan_speed_intake()
-            read_fan_speed_exhaust()
+            initial_time = time.time()
+            read_fan_speed('Humidifier', HUMIDIFIER_FAN_RPM_PULSE)
+            read_fan_speed('Intake', INTAKE_FAN_RPM_PULSE)
+            read_fan_speed('Exhaust', EXHAUST_FAN_RPM_PULSE)
 
         except RuntimeError as error:
             print(error.args[0])
