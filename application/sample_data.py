@@ -48,13 +48,14 @@ TARGET_CO2_CONTENT = 600        # [Parts per Million CO2]
 MAX_CO2_CONTENT = 700
 CO2_TOLERANCE_BAND = 0.10
 
-FAN_OFF = 0
+FAN_MIN = 0
 FAN_LOW = 25
 FAN_MID = 50
 FAN_HIGH = 75
 FAN_MAX = 100
 
-STALL_TIME = 50                  # [sec] Controller sleep time
+FAN_MAX_SPEED = 1600            # [RPM]
+FAN_EFFICIENCY = 0.95           # [%]
 
 def trim_samples(sample_id):
     if sample_id > 25920:
@@ -78,7 +79,6 @@ def read_fan_speed(fan, pulse):
     frequency = 1 / dt
     rpm = (frequency / pulse) * 60
     print(f'{fan} FAN SPEED = {rpm} RPM')
-    initial_time = time.time()
 
 def fan_control(temperature, humidity, carbon_dioxide):    
     # Temperature Control
@@ -118,7 +118,7 @@ def fan_control(temperature, humidity, carbon_dioxide):
     else:
         set_fan_speed(humidifer_fan, FAN_LOW)
         # Power off humidifier disc
-        print(f'HUMIDITY READING OF {humidity}% - POWERING OFF HUMIDIFIER AND SETTING FAN TO {FAN_OFF}%')
+        print(f'HUMIDITY READING OF {humidity}% - POWERING OFF HUMIDIFIER AND SETTING FAN TO {FAN_MIN}%')
 
     # Carbon Dioxide Content Control
     if carbon_dioxide >= MAX_CO2_CONTENT:
@@ -155,14 +155,14 @@ try:
     intake_fan = GPIO.PWM(INTAKE_FAN_PWM_PIN, INTAKE_FAN_PWM_FREQ)
     exhaust_fan = GPIO.PWM(EXHAUST_FAN_PWM_PIN, EXHAUST_FAN_PWM_FREQ)
 
-    humidifer_fan.start(FAN_OFF)
-    intake_fan.start(FAN_OFF)
-    exhaust_fan.start(FAN_OFF)
+    humidifer_fan.start(FAN_MIN)
+    intake_fan.start(FAN_MIN)
+    exhaust_fan.start(FAN_MIN)
 
     # Fan RPM data collection
-    GPIO.add_event_detect(HUMIDIFIER_FAN_RPM_PIN, GPIO.BOTH)
-    GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.BOTH)
-    GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.BOTH)
+    GPIO.add_event_detect(HUMIDIFIER_FAN_RPM_PIN, GPIO.FALLING)
+    GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.FALLING)
+    GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.FALLING)
 
     # Runtime
     while True:
@@ -178,6 +178,7 @@ try:
             current_time = datetime.datetime.now()
             temperature = round(dht_device.temperature * (9 / 5) + 32, 2)
             humidity = dht_device.humidity
+            # carbon_dioxide = mh_z19.read()['co2']
             carbon_dioxide = mh_z19.read_from_pwm(gpio=12, range=4000)['co2']
             print(f'Sample Number: {sample_num} | Time of Sample: {current_time} | Temperature: {temperature} | Humidity: {humidity} | Carbon Dioxide: {carbon_dioxide}')
 
@@ -192,14 +193,22 @@ try:
             
             time.sleep(sampling_frequency / 2)
 
-            # Tachometer
             initial_time = time.time()
-            if GPIO.event_detected(HUMIDIFIER_FAN_RPM_PIN):
-                read_fan_speed('Humidifier', HUMIDIFIER_FAN_RPM_PULSE)
-            if GPIO.event_detected(INTAKE_FAN_RPM_PIN):
-                read_fan_speed('Intake', INTAKE_FAN_RPM_PULSE)
-            if GPIO.event_detected(EXHAUST_FAN_RPM_PIN):
-                read_fan_speed('Exhaust', EXHAUST_FAN_RPM_PULSE)
+            GPIO.add_event_detect(HUMIDIFIER_FAN_RPM_PIN, GPIO.FALLING, read_fan_speed('Humidifier', HUMIDIFIER_FAN_RPM_PULSE))
+            GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.FALLING, read_fan_speed('Intake', INTAKE_FAN_RPM_PULSE))
+            GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.FALLING, read_fan_speed('Exhaust', EXHAUST_FAN_RPM_PULSE))
+
+            GPIO.remove_event_detect(HUMIDIFIER_FAN_RPM_PIN)
+            GPIO.remove_event_detect(INTAKE_FAN_RPM_PIN)
+            GPIO.remove_event_detect(EXHAUST_FAN_RPM_PIN)
+
+            # Tachometer
+            # if GPIO.event_detected(HUMIDIFIER_FAN_RPM_PIN):
+            #     read_fan_speed('Humidifier', HUMIDIFIER_FAN_RPM_PULSE)
+            # if GPIO.event_detected(INTAKE_FAN_RPM_PIN):
+            #     read_fan_speed('Intake', INTAKE_FAN_RPM_PULSE)
+            # if GPIO.event_detected(EXHAUST_FAN_RPM_PIN):
+            #     read_fan_speed('Exhaust', EXHAUST_FAN_RPM_PULSE)
 
             time.sleep(sampling_frequency / 2)
 
