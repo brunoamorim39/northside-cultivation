@@ -70,9 +70,8 @@ def set_fan_speed(target_fan, fan_speed):
 
 def read_fan_speed(fan, pulse):
     global initial_time
-    rpm_sleep = 5
 
-    dt = time.time() - initial_time - sampling_frequency - rpm_sleep
+    dt = time.time() - initial_time - sampling_frequency
     if dt < 0.005:
         return
 
@@ -80,7 +79,6 @@ def read_fan_speed(fan, pulse):
     rpm = (frequency / pulse) * 60
     print(f'{fan} FAN SPEED = {rpm} RPM')
     initial_time = time.time()
-    time.sleep(rpm_sleep)
 
 def fan_control(temperature, humidity, carbon_dioxide):    
     # Temperature Control
@@ -162,11 +160,11 @@ try:
     exhaust_fan.start(FAN_OFF)
 
     # Fan RPM data collection
-    initial_time_humidifier = time.time()
+    # initial_time_humidifier = time.time()
     # GPIO.add_event_detect(HUMIDIFIER_FAN_RPM_PIN, GPIO.BOTH, read_fan_speed_humidifier)
-    initial_time_intake = time.time()
+    # initial_time_intake = time.time()
     # GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.BOTH, read_fan_speed_intake)
-    initial_time_exhaust = time.time()    
+    # initial_time_exhaust = time.time()    
     # GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.BOTH, read_fan_speed_exhaust)
 
     # Runtime
