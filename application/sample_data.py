@@ -72,8 +72,8 @@ def read_fan_speed(fan, pulse):
     global initial_time
 
     dt = time.time() - initial_time
-    # if dt < 0.005:
-    #     return
+    if dt < 0.005:
+        return
 
     frequency = 1 / dt
     rpm = (frequency / pulse) * 60
