@@ -71,7 +71,7 @@ def set_fan_speed(target_fan, fan_speed):
 def read_fan_speed(fan, pulse):
     global initial_time
 
-    dt = time.time() - initial_time - (sampling_frequency / 2)
+    dt = time.time() - initial_time
     # if dt < 0.005:
     #     return
 
