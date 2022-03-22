@@ -13,23 +13,23 @@ dht_device = adafruit_dht.DHT22(board.D4)
 sampling_frequency = 100.0
 
 # Initialization for PWM control
-HUMIDIFIER_FAN_PWM_PIN = 16     # Pin used to control PWM fan
-HUMIDIFIER_FAN_PWM_FREQ = 25    # [kHz] Frequency for PWM control
+HUMIDIFIER_FAN_PWM_PIN = 23     # Pin used to control PWM fan
+HUMIDIFIER_FAN_PWM_FREQ = 25    # [Hz] Frequency for PWM control
 
-INTAKE_FAN_PWM_PIN = 13          # Pin used to control PWM fan
-INTAKE_FAN_PWM_FREQ = 25        # [kHz] Frequency for PWM control
+INTAKE_FAN_PWM_PIN = 27         # Pin used to control PWM fan
+INTAKE_FAN_PWM_FREQ = 25        # [Hz] Frequency for PWM control
 
-EXHAUST_FAN_PWM_PIN = 29         # Pin used to control PWM fan
-EXHAUST_FAN_PWM_FREQ = 25       # [kHz] Frequency for PWM control
+EXHAUST_FAN_PWM_PIN = 5         # Pin used to control PWM fan
+EXHAUST_FAN_PWM_FREQ = 25       # [Hz] Frequency for PWM control
 
 # Initialization for RPM feedback
-HUMIDIFIER_FAN_RPM_PIN = 18     # Pin for RPM output
+HUMIDIFIER_FAN_RPM_PIN = 24     # Pin for RPM output
 HUMIDIFER_FAN_RPM_PULSE = 2     # Pulses per fan revolution
 
-INTAKE_FAN_RPM_PIN = 15          # Pin for RPM output
+INTAKE_FAN_RPM_PIN = 22         # Pin for RPM output
 INTAKE_FAN_RPM_PULSE = 2        # Pulses per fan revolution
 
-EXHAUST_FAN_RPM_PIN = 31         # Pin for RPM output
+EXHAUST_FAN_RPM_PIN = 6         # Pin for RPM output
 EXHAUST_FAN_RPM_PULSE = 2       # Pulses per fan revolution
 
 # Parameters for temperature, humidity, and CO2 content control
@@ -181,7 +181,7 @@ try:
             current_time = datetime.datetime.now()
             temperature = dht_device.temperature * (9 / 5) + 32
             humidity = dht_device.humidity
-            carbon_dioxide = mh_z19.read()['co2']
+            carbon_dioxide = mh_z19.read_from_pwm(gpio=12, range=2000)['co2']
             print(f'Sample Number: {sample_num} | Time of Sample: {current_time} | Temperature: {temperature} | Humidity: {humidity} | Carbon Dioxide: {carbon_dioxide}')
 
             sample = DataLog(id=sample_num, time=current_time, temperature=temperature, humidity=humidity, carbon_dioxide=carbon_dioxide)
