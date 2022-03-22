@@ -185,9 +185,9 @@ try:
 
     # Fan RPM data collection
     initial_time = time.time()
-    GPIO.add_event_detect(HUMIDIFIER_FAN_RPM_PIN, GPIO.BOTH)
-    GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.BOTH)
-    GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.BOTH)
+    GPIO.add_event_detect(HUMIDIFIER_FAN_RPM_PIN, GPIO.BOTH, read_fan_speed_humidifier)
+    GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.BOTH, read_fan_speed_intake)
+    GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.BOTH, read_fan_speed_exhaust)
 
     # Runtime
     while True:
