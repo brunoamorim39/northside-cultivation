@@ -160,9 +160,9 @@ try:
     exhaust_fan.start(FAN_MIN)
 
     # Fan RPM data collection
-    GPIO.add_event_detect(HUMIDIFIER_FAN_RPM_PIN, GPIO.FALLING)
-    GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.FALLING)
-    GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.FALLING)
+    # GPIO.add_event_detect(HUMIDIFIER_FAN_RPM_PIN, GPIO.FALLING)
+    # GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.FALLING)
+    # GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.FALLING)
 
     # Runtime
     while True:
