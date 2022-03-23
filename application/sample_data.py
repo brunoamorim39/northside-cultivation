@@ -190,19 +190,18 @@ try:
             trim_samples(sample_num)
 
             # Controller
+            time.sleep(sampling_frequency / 4)
             fan_control(temperature, humidity, carbon_dioxide)
-            
-            time.sleep(sampling_frequency / 2)
 
-            initial_time = time.time()
-            GPIO.add_event_detect(HUMIDIFIER_FAN_RPM_PIN, GPIO.BOTH, callback=lambda x: read_fan_speed('Humidifier', HUMIDIFIER_FAN_RPM_PULSE))
-            GPIO.remove_event_detect(HUMIDIFIER_FAN_RPM_PIN)
+            # initial_time = time.time()
+            # GPIO.add_event_detect(HUMIDIFIER_FAN_RPM_PIN, GPIO.BOTH, callback=lambda x: read_fan_speed('Humidifier', HUMIDIFIER_FAN_RPM_PULSE))
+            # GPIO.remove_event_detect(HUMIDIFIER_FAN_RPM_PIN)
 
-            GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.BOTH, callback=lambda x: read_fan_speed('Intake', INTAKE_FAN_RPM_PULSE))
-            GPIO.remove_event_detect(INTAKE_FAN_RPM_PIN)
+            # GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.BOTH, callback=lambda x: read_fan_speed('Intake', INTAKE_FAN_RPM_PULSE))
+            # GPIO.remove_event_detect(INTAKE_FAN_RPM_PIN)
 
-            GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.BOTH, callback=lambda x: read_fan_speed('Exhaust', EXHAUST_FAN_RPM_PULSE))
-            GPIO.remove_event_detect(EXHAUST_FAN_RPM_PIN)
+            # GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.BOTH, callback=lambda x: read_fan_speed('Exhaust', EXHAUST_FAN_RPM_PULSE))
+            # GPIO.remove_event_detect(EXHAUST_FAN_RPM_PIN)
 
             # Tachometer
             # if GPIO.event_detected(HUMIDIFIER_FAN_RPM_PIN):
@@ -212,7 +211,7 @@ try:
             # if GPIO.event_detected(EXHAUST_FAN_RPM_PIN):
             #     read_fan_speed('Exhaust', EXHAUST_FAN_RPM_PULSE)
 
-            time.sleep(sampling_frequency / 2)
+            time.sleep((sampling_frequency / 4) * 3)
 
         except RuntimeError as error:
             print(error.args[0])
