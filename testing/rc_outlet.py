@@ -12,8 +12,12 @@ try:
         try:
             print('Turning button ON...')
             GPIO.output(GPIO_PIN, GPIO.HIGH)
+            time.sleep(0.5)
+            GPIO.output(GPIO_PIN, GPIO.LOW)
             time.sleep(30)
             print('Turning button OFF...')
+            GPIO.output(GPIO_PIN, GPIO.LOW)
+            time.sleep(0.5)
             GPIO.output(GPIO_PIN, GPIO.LOW)
             time.sleep(30)
         except RuntimeError as error:
