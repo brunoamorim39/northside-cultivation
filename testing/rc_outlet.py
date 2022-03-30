@@ -14,12 +14,12 @@ try:
             GPIO.output(GPIO_PIN, GPIO.LOW)
             time.sleep(0.5)
             GPIO.output(GPIO_PIN, GPIO.HIGH)
-            time.sleep(30)
+            time.sleep(2.5)
             print('Turning button OFF...')
             GPIO.output(GPIO_PIN, GPIO.LOW)
             time.sleep(0.5)
             GPIO.output(GPIO_PIN, GPIO.HIGH)
-            time.sleep(30)
+            time.sleep(2.5)
         except RuntimeError as error:
             print(error.args[0])
 except KeyboardInterrupt:
