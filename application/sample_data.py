@@ -270,4 +270,5 @@ except KeyboardInterrupt:
     set_fan_speed(humidifer_fan, FAN_HIGH)
     set_fan_speed(intake_fan, FAN_HIGH)
     set_fan_speed(exhaust_fan, FAN_HIGH)
+    cycle_power_humidifier('OFF')
     GPIO.cleanup()
