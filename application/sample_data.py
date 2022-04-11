@@ -37,19 +37,19 @@ EXHAUST_FAN_RPM_PIN = 6         # Pin for RPM output
 EXHAUST_FAN_RPM_PULSE = 2       # Pulses per fan revolution
 
 # Parameters for temperature, humidity, and CO2 content control
-MIN_TEMPERATURE = 68
-TARGET_TEMPERATURE = 73         # [Degrees Fahrenheit]
-MAX_TEMPERATURE = 78
+MIN_TEMPERATURE = 65
+TARGET_TEMPERATURE = 70         # [Degrees Fahrenheit]
+MAX_TEMPERATURE = 75
 TEMPERATURE_TOLERANCE_BAND = 0.045
 
-MIN_HUMIDITY = 90
-TARGET_HUMIDITY = 95            # [% Relative Humidity]
-MAX_HUMIDITY = 100
+MIN_HUMIDITY = 85
+TARGET_HUMIDITY = 90            # [% Relative Humidity]
+MAX_HUMIDITY = 95
 HUMIDITY_TOLERANCE_BAND = 0.03
 
 MIN_CO2_CONTENT = 500
-TARGET_CO2_CONTENT = 600        # [Parts per Million CO2]
-MAX_CO2_CONTENT = 700
+TARGET_CO2_CONTENT = 750        # [Parts per Million CO2]
+MAX_CO2_CONTENT = 1000
 CO2_TOLERANCE_BAND = 0.10
 
 FAN_MIN = 0
@@ -271,9 +271,8 @@ except KeyboardInterrupt:
     set_fan_speed(humidifer_fan, FAN_HIGH)
     set_fan_speed(intake_fan, FAN_HIGH)
     set_fan_speed(exhaust_fan, FAN_HIGH)
-    if GPIO.input(HUMIDIFIER_POWER_PIN) == 0:
-        GPIO.output(HUMIDIFIER_POWER_PIN, GPIO.HIGH)
-        time.sleep(0.5)
-        GPIO.output(HUMIDIFIER_POWER_PIN, GPIO.LOW)
-        print('Humidifier powered OFF')
+    GPIO.output(HUMIDIFIER_POWER_PIN, GPIO.HIGH)
+    time.sleep(0.5)
+    GPIO.output(HUMIDIFIER_POWER_PIN, GPIO.LOW)
+    print('Humidifier powered OFF')
     GPIO.cleanup()
