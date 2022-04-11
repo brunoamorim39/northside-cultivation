@@ -160,19 +160,19 @@ def fan_control(temperature, humidity, carbon_dioxide):
 
     elif carbon_dioxide >= TARGET_CO2_CONTENT * (1 + CO2_TOLERANCE_BAND) and carbon_dioxide < MAX_CO2_CONTENT:
         set_fan_speed(exhaust_fan, FAN_MID)
-        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_HIGH}%')
+        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_MID}%')
 
     elif carbon_dioxide <= TARGET_CO2_CONTENT * (1 - CO2_TOLERANCE_BAND) and carbon_dioxide > MIN_CO2_CONTENT:
         set_fan_speed(exhaust_fan, FAN_LOW)
-        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_MID}%')
+        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_LOW}%')
         
     elif carbon_dioxide <= MIN_CO2_CONTENT:
         set_fan_speed(exhaust_fan, FAN_MIN)
-        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_LOW}%')
+        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_MIN}%')
         
     else:
         set_fan_speed(exhaust_fan, FAN_MIN)
-        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_MID}%')
+        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_MIN}%')
 
 try:
     print('Initializing control...')
