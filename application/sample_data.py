@@ -262,17 +262,17 @@ try:
             raise error
 
 except KeyboardInterrupt:
+    GPIO.output(HUMIDIFIER_POWER_PIN, GPIO.HIGH)
+    time.sleep(2.5)
+    GPIO.output(HUMIDIFIER_POWER_PIN, GPIO.LOW)
+    set_fan_speed(humidifer_fan, FAN_HIGH)
+    set_fan_speed(intake_fan, FAN_HIGH)
+    set_fan_speed(exhaust_fan, FAN_HIGH)
     print(f'''
         CANCELLED CONTROL:
+        'Humidifier powered OFF'
         SETTING HUMIDIFIER FAN SPEED TO {FAN_HIGH}%
         SETTING INTAKE FAN SPEED TO {FAN_HIGH}%
         SETTING EXHAUST FAN SPEED TO {FAN_HIGH}%
     ''')
-    set_fan_speed(humidifer_fan, FAN_HIGH)
-    set_fan_speed(intake_fan, FAN_HIGH)
-    set_fan_speed(exhaust_fan, FAN_HIGH)
-    GPIO.output(HUMIDIFIER_POWER_PIN, GPIO.HIGH)
-    time.sleep(0.5)
-    GPIO.output(HUMIDIFIER_POWER_PIN, GPIO.LOW)
-    print('Humidifier powered OFF')
     GPIO.cleanup()
