@@ -11,7 +11,7 @@ from models import DataLog, DataLogHistorical
 
 # Initialize runtime parameters
 dht_device = adafruit_dht.DHT22(board.D4)
-sampling_frequency = 100.0
+sampling_frequency = 60.0
 
 # Initialization for Humidifier power
 HUMIDIFIER_POWER_PIN = 10
@@ -45,7 +45,7 @@ TEMPERATURE_TOLERANCE_BAND = 0.045
 MIN_HUMIDITY = 85
 TARGET_HUMIDITY = 90            # [% Relative Humidity]
 MAX_HUMIDITY = 95
-HUMIDITY_TOLERANCE_BAND = 0.03
+HUMIDITY_TOLERANCE_BAND = 0.015
 
 MIN_CO2_CONTENT = 500
 TARGET_CO2_CONTENT = 750        # [Parts per Million CO2]
@@ -62,7 +62,7 @@ FAN_MAX_SPEED = 1600            # [RPM]
 FAN_EFFICIENCY = 0.95           # [%]
 
 def trim_samples(sample_id):
-    if sample_id > 25920:
+    if sample_id > 20160:
         present_first_sample = DataLog.query.first()
         historical_sample = DataLogHistorical(present_first_sample)
         db.session.add(historical_sample)
@@ -82,9 +82,9 @@ def cycle_power_humidifier(desired_state):
 
         elif GPIO.input(HUMIDIFIER_POWER_PIN) == 0 and desired_state == 'OFF':
             GPIO.output(HUMIDIFIER_POWER_PIN, GPIO.HIGH)
-            time.sleep(0.5)
+            time.sleep(1.0)
             GPIO.output(HUMIDIFIER_POWER_PIN, GPIO.LOW)
-            time.sleep(0.5)
+            time.sleep(1.0)
             GPIO.output(HUMIDIFIER_POWER_PIN, GPIO.HIGH)
             print('Humidifier powered OFF')
 
@@ -109,70 +109,70 @@ def fan_control(temperature, humidity, carbon_dioxide):
     # Temperature Control
     if temperature >= MAX_TEMPERATURE:
         set_fan_speed(intake_fan, FAN_MAX)
-        print(f'TEMPERATURE READING OF {temperature}°F - SETTING INTAKE FAN TO {FAN_MAX}%')
+        print(f'TEMP OF {temperature}°F - INTAKE TO {FAN_MAX}%')
 
     elif temperature >= TARGET_TEMPERATURE * (1 + TEMPERATURE_TOLERANCE_BAND) and temperature < MAX_TEMPERATURE:
         set_fan_speed(intake_fan, FAN_HIGH)
-        print(f'TEMPERATURE READING OF {temperature}°F - SETTING INTAKE FAN TO {FAN_HIGH}%')
+        print(f'TEMP OF {temperature}°F - INTAKE TO {FAN_HIGH}%')
 
     elif temperature <= TARGET_TEMPERATURE * (1 - TEMPERATURE_TOLERANCE_BAND) and temperature > MIN_TEMPERATURE:
         set_fan_speed(intake_fan, FAN_MID)
-        print(f'TEMPERATURE READING OF {temperature}°F - SETTING INTAKE FAN TO {FAN_MID}%')
+        print(f'TEMP OF {temperature}°F - INTAKE TO {FAN_MID}%')
 
     elif temperature <= MIN_TEMPERATURE:
         set_fan_speed(intake_fan, FAN_LOW)
-        print(f'TEMPERATURE READING OF {temperature}°F - SETTING INTAKE FAN TO {FAN_LOW}%')
+        print(f'TEMP OF {temperature}°F - INTAKE TO {FAN_LOW}%')
 
     else:
         set_fan_speed(intake_fan, FAN_MID)
-        print(f'TEMPERATURE READING OF {temperature}°F - SETTING INTAKE FAN TO {FAN_MID}%')
+        print(f'TEMP OF {temperature}°F - INTAKE TO {FAN_MID}%')
 
     # Humidity Control
     if humidity <= MIN_HUMIDITY:
         set_fan_speed(humidifer_fan, FAN_MAX)
         cycle_power_humidifier('ON')
-        print(f'HUMIDITY READING OF {humidity}% - POWERING ON HUMIDIFIER AND SETTING FAN TO {FAN_MAX}%')
+        print(f'RH% OF {humidity}% - HUMIDIFIER ON AND FAN TO {FAN_MAX}%')
 
     elif humidity <= TARGET_HUMIDITY * (1 - HUMIDITY_TOLERANCE_BAND) and humidity > MIN_HUMIDITY:
         set_fan_speed(humidifer_fan, FAN_HIGH)
         cycle_power_humidifier('ON')
-        print(f'HUMIDITY READING OF {humidity}% - POWERING ON HUMIDIFIER AND SETTING FAN TO {FAN_HIGH}%')
+        print(f'RH% OF {humidity}% - HUMIDIFIER ON AND FAN TO {FAN_HIGH}%')
 
     elif humidity <= TARGET_HUMIDITY * (1 + HUMIDITY_TOLERANCE_BAND) and humidity > TARGET_HUMIDITY * (1 - HUMIDITY_TOLERANCE_BAND):
         set_fan_speed(humidifer_fan, FAN_MID)
         cycle_power_humidifier('ON')
-        print(f'HUMIDITY READING OF {humidity}% - POWERING ON HUMIDIFIER AND SETTING FAN TO {FAN_MID}%')
+        print(f'RH% OF {humidity}% - HUMIDIFIER ON AND FAN TO {FAN_MID}%')
 
     elif humidity <= MAX_HUMIDITY and humidity > TARGET_HUMIDITY * (1 + HUMIDITY_TOLERANCE_BAND):
         set_fan_speed(humidifer_fan, FAN_LOW)
         cycle_power_humidifier('OFF')
-        print(f'HUMIDITY READING OF {humidity}% - POWERING OFF HUMIDIFIER AND SETTING FAN TO {FAN_LOW}%')
+        print(f'RH% OF {humidity}% - HUMIDIFIER OFF AND FAN TO {FAN_LOW}%')
 
     else:
         set_fan_speed(humidifer_fan, FAN_LOW)
         cycle_power_humidifier('OFF')
-        print(f'HUMIDITY READING OF {humidity}% - POWERING OFF HUMIDIFIER AND SETTING FAN TO {FAN_MIN}%')
+        print(f'RH% OF {humidity}% - HUMIDIFIER OFF AND FAN TO {FAN_MIN}%')
 
     # Carbon Dioxide Content Control
     if carbon_dioxide >= MAX_CO2_CONTENT:
         set_fan_speed(exhaust_fan, FAN_MAX)
-        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_MAX}%')
+        print(f'CO2 OF {carbon_dioxide} PPM - EXHAUST TO {FAN_MAX}%')
 
     elif carbon_dioxide >= TARGET_CO2_CONTENT * (1 + CO2_TOLERANCE_BAND) and carbon_dioxide < MAX_CO2_CONTENT:
         set_fan_speed(exhaust_fan, FAN_MID)
-        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_MID}%')
+        print(f'CO2 OF {carbon_dioxide} PPM - EXHAUST TO {FAN_MID}%')
 
     elif carbon_dioxide <= TARGET_CO2_CONTENT * (1 - CO2_TOLERANCE_BAND) and carbon_dioxide > MIN_CO2_CONTENT:
         set_fan_speed(exhaust_fan, FAN_LOW)
-        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_LOW}%')
+        print(f'CO2 OF {carbon_dioxide} PPM - EXHAUST TO {FAN_LOW}%')
         
     elif carbon_dioxide <= MIN_CO2_CONTENT:
         set_fan_speed(exhaust_fan, FAN_MIN)
-        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_MIN}%')
+        print(f'CO2 OF {carbon_dioxide} PPM - EXHAUST TO {FAN_MIN}%')
         
     else:
         set_fan_speed(exhaust_fan, FAN_MIN)
-        print(f'CARBON DIOXIDE READING OF {carbon_dioxide} PPM - SETTING EXHAUST FAN SPEED TO {FAN_MIN}%')
+        print(f'CO2 OF {carbon_dioxide} PPM - EXHAUST TO {FAN_MIN}%')
 
 try:
     print('Initializing control...')
@@ -180,7 +180,7 @@ try:
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
 
-    GPIO.setup(HUMIDIFIER_POWER_PIN, GPIO.OUT, initial=GPIO.HIGH)
+    GPIO.setup(HUMIDIFIER_POWER_PIN, GPIO.OUT, initial=GPIO.LOW)
     GPIO.output(HUMIDIFIER_POWER_PIN, GPIO.HIGH)
 
     GPIO.setup(HUMIDIFIER_FAN_PWM_PIN, GPIO.OUT, initial=GPIO.LOW)
@@ -220,7 +220,7 @@ try:
             humidity = dht_device.humidity
             # carbon_dioxide = mh_z19.read()['co2']
             carbon_dioxide = mh_z19.read_from_pwm(gpio=12, range=5000)['co2']
-            print(f'Sample Number: {sample_num} | Time of Sample: {current_time} | Temperature: {temperature} | Humidity: {humidity} | Carbon Dioxide: {carbon_dioxide}')
+            print(f'Sample: {sample_num} | Time: {current_time} | Temperature: {temperature} | Humidity: {humidity} | Carbon Dioxide: {carbon_dioxide}')
 
             sample = DataLog(id=sample_num, time=current_time, temperature=temperature, humidity=humidity, carbon_dioxide=carbon_dioxide)
             db.session.add(sample)
@@ -229,7 +229,6 @@ try:
             trim_samples(sample_num)
 
             # Controller
-            time.sleep(sampling_frequency / 4)
             fan_control(temperature, humidity, carbon_dioxide)
 
             # initial_time = time.time()
@@ -250,7 +249,7 @@ try:
             # if GPIO.event_detected(EXHAUST_FAN_RPM_PIN):
             #     read_fan_speed('Exhaust', EXHAUST_FAN_RPM_PULSE)
 
-            time.sleep((sampling_frequency / 4) * 3)
+            time.sleep(sampling_frequency)
 
         except RuntimeError as error:
             print(error.args[0])
@@ -270,9 +269,9 @@ except KeyboardInterrupt:
     set_fan_speed(exhaust_fan, FAN_HIGH)
     print(f'''
         CANCELLED CONTROL:
-        'Humidifier powered OFF'
-        SETTING HUMIDIFIER FAN SPEED TO {FAN_HIGH}%
-        SETTING INTAKE FAN SPEED TO {FAN_HIGH}%
-        SETTING EXHAUST FAN SPEED TO {FAN_HIGH}%
+        HUMIDIFIER OFF
+        HUMIDIFIER FAN TO {FAN_HIGH}%
+        INTAKE FAN TO {FAN_HIGH}%
+        EXHAUST FAN TO {FAN_HIGH}%
     ''')
     GPIO.cleanup()
