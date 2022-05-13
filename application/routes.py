@@ -72,7 +72,7 @@ def index():
 @app.route('/data-log', methods=['GET'])
 def data_log():
     data_array = []
-    for sample in DataLog.query.order_by(DataLog.id.desc()).limit(4320):
+    for sample in DataLog.query.order_by(DataLog.id.desc()).limit(7200):
         sample_obj = {}
         sample_obj['sample_number'] = sample.id
         sample_obj['current_time'] = sample.time
