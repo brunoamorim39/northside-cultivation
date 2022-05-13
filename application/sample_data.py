@@ -42,9 +42,9 @@ TARGET_TEMPERATURE = 70         # [Degrees Fahrenheit]
 MAX_TEMPERATURE = 75
 TEMPERATURE_TOLERANCE_BAND = 0.045
 
-MIN_HUMIDITY = 85
-TARGET_HUMIDITY = 90            # [% Relative Humidity]
-MAX_HUMIDITY = 95
+MIN_HUMIDITY = 80
+TARGET_HUMIDITY = 85            # [% Relative Humidity]
+MAX_HUMIDITY = 90
 HUMIDITY_TOLERANCE_BAND = 0.015
 
 MIN_CO2_CONTENT = 500
@@ -226,7 +226,7 @@ try:
             db.session.add(sample)
             db.session.commit()
 
-            trim_samples(sample_num)
+            # trim_samples(sample_num)
 
             # Controller
             fan_control(temperature, humidity, carbon_dioxide)
