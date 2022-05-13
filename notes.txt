@@ -3,3 +3,6 @@ sudo uwsgi --ini uwsgi.ini
 
 SAMPLE DATA
 sudo python3 sample_data.py
+
+TO RESTART SERVER
+sudo systemctl restart uwsgi
