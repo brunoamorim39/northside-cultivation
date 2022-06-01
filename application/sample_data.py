@@ -1,16 +1,17 @@
 from itertools import cycle
 import time
 import datetime
-import board
+# import board
 import adafruit_dht
-import mh_z19
-import RPi.GPIO as GPIO
+# import mh_z19
+# import RPi.GPIO as GPIO
+import json
 
 from __init__ import db
 from models import DataLog, DataLogHistorical
 
 # Initialize runtime parameters
-dht_device = adafruit_dht.DHT22(board.D4)
+# dht_device = adafruit_dht.DHT22(board.D4)
 sampling_frequency = 60.0
 
 # Initialization for Humidifier power
@@ -36,6 +37,7 @@ INTAKE_FAN_RPM_PULSE = 2        # Pulses per fan revolution
 EXHAUST_FAN_RPM_PIN = 6         # Pin for RPM output
 EXHAUST_FAN_RPM_PULSE = 2       # Pulses per fan revolution
 
+# DELETE BELOW FOR NEXT UPDATE
 # Parameters for temperature, humidity, and CO2 content control
 MIN_TEMPERATURE = 65
 TARGET_TEMPERATURE = 70         # [Degrees Fahrenheit]
@@ -51,6 +53,7 @@ MIN_CO2_CONTENT = 500
 TARGET_CO2_CONTENT = 750        # [Parts per Million CO2]
 MAX_CO2_CONTENT = 1000
 CO2_TOLERANCE_BAND = 0.10
+# DELETE ABOVE FOR NEXT UPDATE
 
 FAN_MIN = 0
 FAN_LOW = 25
@@ -58,16 +61,29 @@ FAN_MID = 50
 FAN_HIGH = 75
 FAN_MAX = 100
 
-FAN_MAX_SPEED = 1600            # [RPM]
-FAN_EFFICIENCY = 0.95           # [%]
+def select_species(species_list):
+    print('Which species should control parameters be loaded for?')
+    for each in species_list:
+        print(f'{each} [{species_list.index(each) + 1}]')
+    selected_species_code = input('Please select a species by typing in the corresponding number designation: ')
+    try:
+        if int(selected_species_code) < 1:
+            print('Please select a code that is positive and nonzero')
+            time.sleep(1.5)
+            select_species(species_list)
 
-def trim_samples(sample_id):
-    if sample_id > 20160:
-        present_first_sample = DataLog.query.first()
-        historical_sample = DataLogHistorical(present_first_sample)
-        db.session.add(historical_sample)
-        db.session.delete(present_first_sample)
-        db.session.commit()
+        selected_species = species_list[int(selected_species_code) - 1]
+        print(f'You have selected {selected_species}')
+        time.sleep(2.0)
+        print('If the species selection is incorrect, exit the program and make another selection')
+        time.sleep(5.0)
+        return selected_species
+
+    except (TypeError, IndexError) as err:
+        print('Restarting program due to error:')
+        print(err)
+        time.sleep(1.5)
+        select_species(species_list)
 
 def set_fan_speed(target_fan, fan_speed):
     target_fan.ChangeDutyCycle(fan_speed)
@@ -93,88 +109,84 @@ def cycle_power_humidifier(desired_state):
         print(error.args[0])
         return
 
-def read_fan_speed(fan, pulse):
-    global initial_time
-
-    dt = time.time() - initial_time
-    # if dt < 0.005:
-    #     return
-
-    frequency = 1 / dt
-    rpm = (frequency / pulse) * 60
-    print(f'{fan} FAN SPEED = {rpm} RPM')
-    initial_time = time.time()
-
 def fan_control(temperature, humidity, carbon_dioxide):    
     # Temperature Control
     if temperature >= MAX_TEMPERATURE:
         set_fan_speed(intake_fan, FAN_MAX)
-        print(f'TEMP OF {temperature}°F - INTAKE TO {FAN_MAX}%')
+        print(f'TEMP = {temperature}°F => INTAKE TO {FAN_MAX}%')
 
     elif temperature >= TARGET_TEMPERATURE * (1 + TEMPERATURE_TOLERANCE_BAND) and temperature < MAX_TEMPERATURE:
         set_fan_speed(intake_fan, FAN_HIGH)
-        print(f'TEMP OF {temperature}°F - INTAKE TO {FAN_HIGH}%')
+        print(f'TEMP = {temperature}°F => INTAKE TO {FAN_HIGH}%')
 
     elif temperature <= TARGET_TEMPERATURE * (1 - TEMPERATURE_TOLERANCE_BAND) and temperature > MIN_TEMPERATURE:
         set_fan_speed(intake_fan, FAN_MID)
-        print(f'TEMP OF {temperature}°F - INTAKE TO {FAN_MID}%')
+        print(f'TEMP = {temperature}°F => INTAKE TO {FAN_MID}%')
 
     elif temperature <= MIN_TEMPERATURE:
         set_fan_speed(intake_fan, FAN_LOW)
-        print(f'TEMP OF {temperature}°F - INTAKE TO {FAN_LOW}%')
+        print(f'TEMP = {temperature}°F => INTAKE TO {FAN_LOW}%')
 
     else:
         set_fan_speed(intake_fan, FAN_MID)
-        print(f'TEMP OF {temperature}°F - INTAKE TO {FAN_MID}%')
+        print(f'TEMP = {temperature}°F => INTAKE TO {FAN_MID}%')
 
     # Humidity Control
     if humidity <= MIN_HUMIDITY:
         set_fan_speed(humidifer_fan, FAN_MAX)
         cycle_power_humidifier('ON')
-        print(f'RH% OF {humidity}% - HUMIDIFIER ON AND FAN TO {FAN_MAX}%')
+        print(f'RH% = {humidity}% => HUMIDIFIER ON AND FAN TO {FAN_MAX}%')
 
     elif humidity <= TARGET_HUMIDITY * (1 - HUMIDITY_TOLERANCE_BAND) and humidity > MIN_HUMIDITY:
         set_fan_speed(humidifer_fan, FAN_HIGH)
         cycle_power_humidifier('ON')
-        print(f'RH% OF {humidity}% - HUMIDIFIER ON AND FAN TO {FAN_HIGH}%')
+        print(f'RH% = {humidity}% => HUMIDIFIER ON AND FAN TO {FAN_HIGH}%')
 
     elif humidity <= TARGET_HUMIDITY * (1 + HUMIDITY_TOLERANCE_BAND) and humidity > TARGET_HUMIDITY * (1 - HUMIDITY_TOLERANCE_BAND):
         set_fan_speed(humidifer_fan, FAN_MID)
         cycle_power_humidifier('ON')
-        print(f'RH% OF {humidity}% - HUMIDIFIER ON AND FAN TO {FAN_MID}%')
+        print(f'RH% = {humidity}% => HUMIDIFIER ON AND FAN TO {FAN_MID}%')
 
     elif humidity <= MAX_HUMIDITY and humidity > TARGET_HUMIDITY * (1 + HUMIDITY_TOLERANCE_BAND):
         set_fan_speed(humidifer_fan, FAN_LOW)
         cycle_power_humidifier('OFF')
-        print(f'RH% OF {humidity}% - HUMIDIFIER OFF AND FAN TO {FAN_LOW}%')
+        print(f'RH% = {humidity}% => HUMIDIFIER OFF AND FAN TO {FAN_LOW}%')
 
     else:
         set_fan_speed(humidifer_fan, FAN_LOW)
         cycle_power_humidifier('OFF')
-        print(f'RH% OF {humidity}% - HUMIDIFIER OFF AND FAN TO {FAN_MIN}%')
+        print(f'RH% = {humidity}% => HUMIDIFIER OFF AND FAN TO {FAN_MIN}%')
 
     # Carbon Dioxide Content Control
     if carbon_dioxide >= MAX_CO2_CONTENT:
         set_fan_speed(exhaust_fan, FAN_MAX)
-        print(f'CO2 OF {carbon_dioxide} PPM - EXHAUST TO {FAN_MAX}%')
+        print(f'CO2 = {carbon_dioxide} PPM => EXHAUST TO {FAN_MAX}%')
 
     elif carbon_dioxide >= TARGET_CO2_CONTENT * (1 + CO2_TOLERANCE_BAND) and carbon_dioxide < MAX_CO2_CONTENT:
         set_fan_speed(exhaust_fan, FAN_MID)
-        print(f'CO2 OF {carbon_dioxide} PPM - EXHAUST TO {FAN_MID}%')
+        print(f'CO2 = {carbon_dioxide} PPM => EXHAUST TO {FAN_MID}%')
 
     elif carbon_dioxide <= TARGET_CO2_CONTENT * (1 - CO2_TOLERANCE_BAND) and carbon_dioxide > MIN_CO2_CONTENT:
         set_fan_speed(exhaust_fan, FAN_LOW)
-        print(f'CO2 OF {carbon_dioxide} PPM - EXHAUST TO {FAN_LOW}%')
+        print(f'CO2 = {carbon_dioxide} PPM => EXHAUST TO {FAN_LOW}%')
         
     elif carbon_dioxide <= MIN_CO2_CONTENT:
         set_fan_speed(exhaust_fan, FAN_MIN)
-        print(f'CO2 OF {carbon_dioxide} PPM - EXHAUST TO {FAN_MIN}%')
+        print(f'CO2 = {carbon_dioxide} PPM => EXHAUST TO {FAN_MIN}%')
         
     else:
         set_fan_speed(exhaust_fan, FAN_MIN)
-        print(f'CO2 OF {carbon_dioxide} PPM - EXHAUST TO {FAN_MIN}%')
+        print(f'CO2 = {carbon_dioxide} PPM => EXHAUST TO {FAN_MIN}%')
 
 try:
+    # Load mushroom control parameters for desired species
+    params_file = json.loads(open('mushroom-params.json').read())
+    species_list = []
+    for species in params_file:
+        species_list.append(species)
+    select_species(species_list)
+    # SELECT APPROPRIATE FRUITING PARAMETERS BELOW
+
     print('Initializing control...')
     # Initialize PWM fan control
     GPIO.setwarnings(False)
@@ -199,11 +211,6 @@ try:
     intake_fan.start(FAN_MIN)
     exhaust_fan.start(FAN_MIN)
 
-    # Fan RPM data collection
-    # GPIO.add_event_detect(HUMIDIFIER_FAN_RPM_PIN, GPIO.FALLING)
-    # GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.FALLING)
-    # GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.FALLING)
-
     # Runtime
     while True:
         try:
@@ -226,34 +233,14 @@ try:
             db.session.add(sample)
             db.session.commit()
 
-            # trim_samples(sample_num)
-
             # Controller
             fan_control(temperature, humidity, carbon_dioxide)
-
-            # initial_time = time.time()
-            # GPIO.add_event_detect(HUMIDIFIER_FAN_RPM_PIN, GPIO.BOTH, callback=lambda x: read_fan_speed('Humidifier', HUMIDIFIER_FAN_RPM_PULSE))
-            # GPIO.remove_event_detect(HUMIDIFIER_FAN_RPM_PIN)
-
-            # GPIO.add_event_detect(INTAKE_FAN_RPM_PIN, GPIO.BOTH, callback=lambda x: read_fan_speed('Intake', INTAKE_FAN_RPM_PULSE))
-            # GPIO.remove_event_detect(INTAKE_FAN_RPM_PIN)
-
-            # GPIO.add_event_detect(EXHAUST_FAN_RPM_PIN, GPIO.BOTH, callback=lambda x: read_fan_speed('Exhaust', EXHAUST_FAN_RPM_PULSE))
-            # GPIO.remove_event_detect(EXHAUST_FAN_RPM_PIN)
-
-            # Tachometer
-            # if GPIO.event_detected(HUMIDIFIER_FAN_RPM_PIN):
-            #     read_fan_speed('Humidifier', HUMIDIFIER_FAN_RPM_PULSE)
-            # if GPIO.event_detected(INTAKE_FAN_RPM_PIN):
-            #     read_fan_speed('Intake', INTAKE_FAN_RPM_PULSE)
-            # if GPIO.event_detected(EXHAUST_FAN_RPM_PIN):
-            #     read_fan_speed('Exhaust', EXHAUST_FAN_RPM_PULSE)
 
             time.sleep(sampling_frequency)
 
         except RuntimeError as error:
             print(error.args[0])
-            time.sleep(sampling_frequency)
+            time.sleep(5)
             continue
 
         except Exception as error:
