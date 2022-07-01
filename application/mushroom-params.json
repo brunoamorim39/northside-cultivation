@@ -7,19 +7,19 @@
 
         },
         "Fruiting": {
-            "Temperature": {
+            "Temperature (F)": {
                 "Target": 70,
                 "Minimum": 65,
                 "Maximum": 75,
                 "Tolerance": 0.045
             },
-            "Humidity": {
+            "Humidity (RH%)": {
                 "Target": 85,
                 "Minimum": 80,
                 "Maximum": 90,
                 "Tolerance": 0.015
             },
-            "Carbon Dioxide PPM": {
+            "Carbon Dioxide (PPM)": {
                 "Target": 750,
                 "Minimum": 500,
                 "Maximum": 1000,
